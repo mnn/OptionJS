@@ -18,9 +18,11 @@ object OptionJs {
     }
   }
 
-  def getNormalizedValue[T](value: T): T =
-    if (js.isUndefined(value) || value == null) null.asInstanceOf[T]
+  def getNormalizedValue[T](value: T): T = {
+    val isNaN = value.isInstanceOf[Double] && value.asInstanceOf[Double].isNaN
+    if (js.isUndefined(value) || value == null || isNaN) null.asInstanceOf[T]
     else value
+  }
 }
 
 abstract class OptionJs[+A] {
@@ -30,6 +32,8 @@ abstract class OptionJs[+A] {
   @JSExport def get: A = value
 
   @JSExport def map[B](fn: js.Function1[A, B]): OptionJs[B]
+
+  @JSExport def foreach(fn: js.Function1[A, Unit]): Unit
 
   @JSExport def getOrElse[B >: A](default: B): B = if (isEmpty) default else get
 
@@ -62,15 +66,29 @@ abstract class OptionJs[+A] {
   @JSExport def flatMap[B](f: (A) => OptionJs[B]): OptionJs[B] = map(f).flatten
 
   @JSExport def toArray[B >: A]: js.Array[B]
+
+  @JSExport def mapIf[B >: A](cond: js.Function1[A, Boolean], fn: js.Function1[A, B]): OptionJs[B]
+
+  @JSExport def mapIf[B >: A](cond: Boolean, fn: js.Function1[A, B]): OptionJs[B]
+
+  //  @JSExport def `match`[B >: A](some: js.Function1[B, Unit], none: js.Function0[Unit]): Unit = {
+  //    val someJs: js.Function2[B, SomeJs[B], Unit] = (s: B, _: SomeJs[B]) => some(s)
+  //    val noneJs: js.Function1[NoneJs[B], Unit] = (_: NoneJs[B]) => none()
+  //    `match`(someJs, noneJs)
+  //  }
+
+  @JSExport def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C
 }
 
-@JSExport("Some") case class SomeJs[A](rawValue: A) extends OptionJs[A] {
+@JSExport("Some") case class SomeJs[+A](rawValue: A) extends OptionJs[A] {
 
   import OptionJs._
 
   val value = getNormalizedValue(rawValue)
 
-  override def map[B](fn: js.Function1[A, B]): OptionJs[B] = SomeJs[B](fn(get))
+  override def map[B](fn: js.Function1[A, B]): OptionJs[B] = SomeJs[B](fn(value))
+
+  override def foreach(fn: js.Function1[A, Unit]): Unit = fn(value)
 
   override def orElse[B >: A](other: OptionJs[B]): OptionJs[B] = this
 
@@ -79,12 +97,20 @@ abstract class OptionJs[+A] {
   override def filter(p: (A) => Boolean): OptionJs[A] = if (p(value)) this else NoneJs(value)
 
   override def toArray[B >: A]: js.Array[B] = js.Array(value)
+
+  override def mapIf[B >: A](cond: js.Function1[A, Boolean], fn: js.Function1[A, B]): OptionJs[B] = mapIf(cond(value), fn)
+
+  override def mapIf[B >: A](cond: Boolean, fn: js.Function1[A, B]): OptionJs[B] = if (cond) map(fn) else this
+
+  override def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C = some(value, this)
 }
 
-@JSExport("None") case class NoneJs[A](noneValue: Any) extends OptionJs[A] {
+@JSExport("None") case class NoneJs[+A](noneValue: Any) extends OptionJs[A] {
   val value = null.asInstanceOf[A]
 
   override def map[B](fn: js.Function1[A, B]): OptionJs[B] = NoneJs(noneValue)
+
+  override def foreach(fn: js.Function1[A, Unit]): Unit = ()
 
   override def orElse[B >: A](other: OptionJs[B]): OptionJs[B] = other
 
@@ -93,4 +119,10 @@ abstract class OptionJs[+A] {
   override def filter(p: (A) => Boolean): OptionJs[A] = this
 
   override def toArray[B >: A]: js.Array[B] = js.Array()
+
+  override def mapIf[B >: A](cond: js.Function1[A, Boolean], fn: js.Function1[A, B]): OptionJs[B] = this
+
+  override def mapIf[B >: A](cond: Boolean, fn: js.Function1[A, B]): OptionJs[B] = this
+
+  override def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C = none(this)
 }

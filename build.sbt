@@ -6,7 +6,7 @@ version := "0.0.1"
 
 scalaVersion := "2.11.8"
 
-scalaJSOutputWrapper :=("", "tk.monnef.optionjs.OptionJsInit().main();")
+scalaJSOutputWrapper :=("(function(){", "tk.monnef.optionjs.OptionJsInit().main(); })()")
 
 libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.3" % "test"
 

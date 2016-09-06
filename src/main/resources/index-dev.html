@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OptionJS</title>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.15.0/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="../optionjs-fastopt.js"></script>
+<script type="text/babel">
+    (function() {
+        const process = input => Option(input).map(x => x + ' and more').getOrElse('no text found');
+        const test = input => console.log(input, '->', process(input));
+
+        test('a');
+        test(4);
+        test(false);
+        test(NaN);
+        test('');
+        test(0);
+        test(null);
+        test();
+    })();
+
+    (function() {
+        // example complex
+        const jim = {
+            name: 'James',
+            nickname: 'Jim',
+            middleName: 'Tiberius',
+            surname: 'Kirk'
+        };
+        const spock = {
+            name: 'Spock'
+        };
+        const bones = {
+            name: 'Leonard',
+            nickname: 'Bones',
+            middleName: null,
+            surname: 'McCoy'
+        };
+
+        const compileName = person =>
+                Option(person).map(x => [
+                            Option(x.name).getOrElse('John'),
+                            Option(x.middleName).orElse(Option(x.nickname)).map(y => `'${y}'`).get,
+                            Option(x.surname).getOrElse('Doe')
+                        ].filter(x => x).join(' ')
+                ).get;
+
+        function testCompileName(person) {
+            console.log(person, '->', compileName(person));
+        }
+
+        [jim, spock, bones].forEach(testCompileName);
+    })();
+
+    (function() {
+        // basic
+        const greet = input => {
+            console.log(input, '->',
+                    Option(input).map(x => `Hello ${x}!`).getOrElse('Who are you?')
+            );
+        };
+        greet('Martin');  // Martin -> Hello Martin!
+        greet(undefined); // undefined -> Who are you?
+        greet(null);      // null -> Who are you?
+        greet();          // undefined -> Who are you?
+        greet(NaN);       // NaN -> Who are you?
+
+        const greetVanilla = input => {
+            console.log(input, '- vanilla ->',
+                    (input === null || input === undefined) ? 'Who are you?' : `Hello ${input}!`
+            );
+        };
+        greetVanilla('Martin');
+        greetVanilla();
+        greetVanilla(undefined);
+        greetVanilla(null);
+    })();
+
+</script>
+</body>
+</html>

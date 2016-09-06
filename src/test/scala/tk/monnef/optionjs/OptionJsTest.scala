@@ -12,6 +12,7 @@ object OptionJsTest extends TestSuite {
       assert(
         fn(js.undefined) == null,
         fn(null) == null,
+        fn(Double.NaN) == null,
         fn("xx") == "xx",
         fn(1) == 1
       )
@@ -26,12 +27,22 @@ object OptionJsTest extends TestSuite {
       )
     }
 
-    "mapping over" - {
+    "mapp" - {
       assert(
         OptionJs(4).map((a: Int) => a + "x").value == "4x",
         OptionJs(4).map((a: Int) => a * 2).value == 8,
         SomeJs(4).map((a: Int) => a * 2).get == 8
       )
+    }
+
+    "foreach" - {
+      var calledWith = -1
+      OptionJs(4).foreach((x: Int) => calledWith = x)
+      assert(calledWith == 4)
+
+      calledWith = -1
+      OptionJs[Int](null.asInstanceOf[Int]).foreach((x: Int) => calledWith = x)
+      assert(calledWith == -1) // not called
     }
 
     "getOrElse" - {
@@ -155,6 +166,56 @@ object OptionJsTest extends TestSuite {
         OptionJs(null).toArray.isEmpty,
         OptionJs(js.undefined).toArray.isEmpty
       )
+    }
+
+    "mapIf" - {
+      assert(
+        OptionJs(5).mapIf((x: Int) => x > 1, (x: Int) => x + 1).get == 6,
+        OptionJs(5).mapIf((x: Int) => x > 10, (x: Int) => x + 1).get == 5,
+        OptionJs(null).mapIf((_: Null) => true, (_: Null) => 5).get == null,
+        OptionJs(5).mapIf(true, (x: Int) => x + 1).get == 6,
+        OptionJs(5).mapIf(false, (x: Int) => x + 1).get == 5
+      )
+    }
+
+    "match" - {
+      var someCalled, noneCalled = false
+      var params = Array[scala.Any]()
+      var ret: String = null
+      val someHandler: js.Function2[Int, SomeJs[Int], String] = (v: Int, o: SomeJs[Int]) => {
+        params = Array(v, o)
+        someCalled = true
+        v.toString
+      }: String
+      val noneHandler: js.Function1[NoneJs[Int], String] = (o: NoneJs[Int]) => {
+        params = Array(o)
+        noneCalled = true
+        Option(o.noneValue).map(_.toString).getOrElse("null")
+      }: String
+      def reset() = {
+        someCalled = false
+        noneCalled = false
+        params = Array()
+        var ret = null
+      }
+      def check(isSome: Boolean, expectedParams: Array[scala.Any], expectedReturnValue: scala.Any) {
+        if (isSome) assert(someCalled && !noneCalled)
+        else assert(!someCalled && noneCalled)
+        assert(params.sameElements(expectedParams))
+        assert()
+      }
+
+      ret = OptionJs(2).`match`(someHandler, noneHandler)
+      check(true, Array(2, SomeJs(2)), "2")
+      reset()
+
+      ret = OptionJs(10).`match`(someHandler, noneHandler)
+      check(true, Array(10, SomeJs(10)), "10")
+      reset()
+
+      ret = OptionJs[Int](null.asInstanceOf[Int]).`match`(someHandler, noneHandler)
+      check(false, Array(NoneJs(null)), "null")
+      reset()
     }
   }
 }
