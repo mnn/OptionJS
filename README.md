@@ -62,6 +62,6 @@ Output:
 
 ```
 Object { name: "James", nickname: "Jim", middleName: "Tiberius", surname: "Kirk" } -> James 'Tiberius' Kirk
-Object { name: "Spock" } -> Spock Doeindex-dev.html:50:5
+Object { name: "Spock" } -> Spock Doe
 Object { name: "Leonard", nickname: "Bones", middleName: null, surname: "McCoy" } -> Leonard 'Bones' McCoy
 ```
