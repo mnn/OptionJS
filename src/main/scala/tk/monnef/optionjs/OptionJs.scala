@@ -1,7 +1,7 @@
 package tk.monnef.optionjs
 
 import scala.scalajs.js
-import scala.scalajs.js.JSApp
+import scala.scalajs.js.{JSApp, JavaScriptException}
 import scala.scalajs.js.annotation.JSExport
 
 object OptionJsInit extends JSApp {
@@ -24,6 +24,8 @@ object OptionJs {
     else value
   }
 }
+
+@JSExport("NoneError") class NoneError extends JavaScriptException(js.Error("get cannot be called on an instance of None."))
 
 abstract class OptionJs[+A] {
 
@@ -133,4 +135,6 @@ abstract class OptionJs[+A] {
   override def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C = none(this)
 
   override def contains[B >: A](other: B): Boolean = false
+
+  override def get: A = throw new NoneError()
 }

@@ -45,10 +45,10 @@
         const compileName = person =>
                 Option(person).map(x => [
                             Option(x.name).getOrElse('John'),
-                            Option(x.middleName).orElse(Option(x.nickname)).map(y => `'${y}'`).get,
+                            Option(x.middleName).orElse(Option(x.nickname)).map(y => `'${y}'`).orNull,
                             Option(x.surname).getOrElse('Doe')
                         ].filter(x => x).join(' ')
-                ).get;
+                ).orNull;
 
         function testCompileName(person) {
             console.log(person, '->', compileName(person));
@@ -86,7 +86,7 @@
         // def params, chaining
         const reverseString = x => x.split('').reverse().join('');
         const makeItRude = x => x.toUpperCase();
-        const process = input => Option(input).map(reverseString).orElse(Option('default value')).map(makeItRude).get;
+        const process = input => Option(input).map(reverseString).orElse(Option('default value')).map(makeItRude).orNull;
         printAndRun(`process('input A')`);
         printAndRun(`process(null)`);
     })();

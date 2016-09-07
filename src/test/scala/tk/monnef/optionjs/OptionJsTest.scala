@@ -172,7 +172,7 @@ object OptionJsTest extends TestSuite {
       assert(
         OptionJs(5).mapIf((x: Int) => x > 1, (x: Int) => x + 1).get == 6,
         OptionJs(5).mapIf((x: Int) => x > 10, (x: Int) => x + 1).get == 5,
-        OptionJs(null).mapIf((_: Null) => true, (_: Null) => 5).get == null,
+        OptionJs[Null](null).mapIf((_: Null) => true, (_: Null) => 5).orNull == null,
         OptionJs(5).mapIf(true, (x: Int) => x + 1).get == 6,
         OptionJs(5).mapIf(false, (x: Int) => x + 1).get == 5
       )
