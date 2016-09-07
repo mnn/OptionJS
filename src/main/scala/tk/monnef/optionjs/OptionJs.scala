@@ -43,7 +43,7 @@ abstract class OptionJs[+A] {
 
   @JSExport def orElse[B >: A](other: OptionJs[B]): OptionJs[B]
 
-  @JSExport def orNull[B >: A](implicit ev: Null <:< B): B = this getOrElse ev(null)
+  @JSExport def orNull: A
 
   @JSExport def isEmpty: Boolean
 
@@ -111,6 +111,8 @@ abstract class OptionJs[+A] {
   override def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C = some(value, this)
 
   override def contains[B >: A](other: B): Boolean = other == value
+
+  override def orNull: A = value
 }
 
 @JSExport("None") case class NoneJs[+A](noneValue: Any) extends OptionJs[A] {
@@ -137,4 +139,6 @@ abstract class OptionJs[+A] {
   override def contains[B >: A](other: B): Boolean = false
 
   override def get: A = throw new NoneError()
+
+  override def orNull: A = null.asInstanceOf[A]
 }

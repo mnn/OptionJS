@@ -17,13 +17,13 @@ then you do some magic on it and after you are done you can obtain what is insid
 console.log(option.orNull); // prints 'data'
 ```
 
-When you call `Option` you get either an instance of `Some` or `None`. `Some` represents a box with value in it, `None` is an empty box. They both have same interface. The beauty of `Option` is that when you wrap some value with it, the value gets normalized - if it is `null`, `undefined` or `NaN` you always get back `null`. And you can safely, without need to test for those bad values, operate over `Option` instance using for example `map` method. Tha `map` won't do a thing on `None`, just return the same object. But on `Some` it will apply the passed function and then return new instance of `Some`.
+When you call `Option` you get either an instance of `Some` or `None`. `Some` represents a box with value in it, `None` is an empty box. They both have same interface. The beauty of `Option` is that when you wrap some value with it, the value gets normalized - if it is `null`, `undefined` or `NaN` you always get back `null`. And you can safely, without need to test for those bad values, operate over `Option` instance using for example `map` method. Tha `map` won't do a thing on `None`, just return the same object. But on `Some` it will apply a passed function and then return new instance of `Some`.
 
 Let's have an example:
 ```javascript
 Option(5)          // creates Some(5)
   .map(x => x + 1) // returns Some(6)
-  .orNull             // unpacks Some, return 6
+  .orNull          // unpacks Some, return 6
 ```
 This is trivial, just like `5 + 1`, right?
 
@@ -32,7 +32,7 @@ Things got more complicated when input might be `null` or `undefined`.
 ```javascript
 Option(null)       // creates None()
   .map(x => x + 1) // still None()
-  .orNull             // unpacks None(), which is null
+  .orNull          // unpacks None(), which is null
 ```
 Now, when a mad server returns `null` instead of number we propagate this `null`. If we did just `null + 1` we would get `1` which isn't very useful, is it?
 
@@ -70,8 +70,8 @@ greet(NaN);       // NaN -> Who are you?
 const reverseString = x => x.split('').reverse().join('');
 const makeItRude = x => x.toUpperCase();
 const process = input => Option(input).map(reverseString).orElse(Option('default value')).map(makeItRude).orNull;
-printAndRun(`process('input A')`);
-printAndRun(`process(null)`);
+process('input A') // returns 'A TUPNI'
+process(null)      // return 'DEFAULT VALUE'
 ```
 
 Compared to Scala version there are some extra methods like `mapIf` or `match`.
