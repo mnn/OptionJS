@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script type="text/javascript" src="../optionjs-fastopt.js"></script>
 <script type="text/babel">
+
     (function() {
         const process = input => Option(input).map(x => x + ' and more').getOrElse('no text found');
         const test = input => console.log(input, '->', process(input));
@@ -59,9 +60,8 @@
     (function() {
         // basic
         const greet = input => {
-            console.log(input, '->',
-                    Option(input).map(x => `Hello ${x}!`).getOrElse('Who are you?')
-            );
+            const result = Option(input).map(x => `Hello ${x}!`).getOrElse('Who are you?');
+            console.log(input, '->', result);
         };
         greet('Martin');  // Martin -> Hello Martin!
         greet(undefined); // undefined -> Who are you?
@@ -80,6 +80,46 @@
         greetVanilla(null);
     })();
 
+    (function() {
+        function printAndRun(expr) { console.log(expr, '->', eval(expr)); }
+
+        // def params, chaining
+        const reverseString = x => x.split('').reverse().join('');
+        const makeItRude = x => x.toUpperCase();
+        const process = input => Option(input).map(reverseString).orElse(Option('default value')).map(makeItRude).get;
+        printAndRun(`process('input A')`);
+        printAndRun(`process(null)`);
+    })();
+
+    (function() {
+        function printAndRun(expr) { console.log(expr, '->', eval(expr)); }
+
+        const haltVehicle = () => {};
+        const launch = fuel => `whee, that ${fuel} burns so hot`;
+        const postpone = () => {
+            haltVehicle();
+            return 'Wait! I got no fuel!';
+        };
+        const tryLaunch = maybeFuel => Option(maybeFuel).match(launch, postpone);
+        printAndRun(`tryLaunch('log')`); // returns 'whee, that log burns so hot'
+        printAndRun(`tryLaunch(null)`); // calls haltVehicle and returns 'Wait! I got no fuel!'
+    })();
+
+    (function() {
+        function printAndRun(expr) { console.log(expr, '\t//', eval(expr).toString()); }
+
+        const isAccessAllowed = user => Option(user)
+                .filter(user => Option(user.age).exists(x => x >= 18))
+                .exists(user => Option(user.name).exists(name => name.length > 2 && user.name[1] === 'e'));
+        printAndRun(`isAccessAllowed();`);
+        printAndRun(`isAccessAllowed(null);`);
+        printAndRun(`isAccessAllowed({});`);
+        printAndRun(`isAccessAllowed({age: undefined});`);
+        printAndRun(`isAccessAllowed({name: null});`);
+        printAndRun(`isAccessAllowed({name: ''});`);
+        printAndRun(`isAccessAllowed({name: 'Jean-Luc', age: 58});`);
+        printAndRun(`isAccessAllowed({name: 'Wesley', age: 15});`);
+    })();
 </script>
 </body>
 </html>

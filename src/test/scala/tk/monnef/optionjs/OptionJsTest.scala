@@ -94,8 +94,8 @@ object OptionJsTest extends TestSuite {
 
     "count" - {
       assert(
-        OptionJs("").count(_ == "") == 1,
-        OptionJs(null).count(_ => true) == 0
+        OptionJs("").count((x: String) => x == "") == 1,
+        OptionJs(null).count((x: Null) => true) == 0
       )
     }
 
@@ -108,41 +108,41 @@ object OptionJsTest extends TestSuite {
 
     "filter" - {
       assert(
-        OptionJs(2).filter(_ > 0) == SomeJs(2),
-        OptionJs(2).filter(_ > 4) == NoneJs(2),
-        OptionJs(null).filter(_ => true) == NoneJs(null)
+        OptionJs(2).filter((x: Int) => x > 0) == SomeJs(2),
+        OptionJs(2).filter((x: Int) => x > 4) == NoneJs(2),
+        OptionJs(null).filter((x: Null) => true) == NoneJs(null)
       )
     }
 
     "filterNot" - {
       assert(
-        OptionJs(2).filterNot(_ > 0) == NoneJs(2),
-        OptionJs(2).filterNot(_ > 4) == SomeJs(2),
-        OptionJs(null).filterNot(_ => false) == NoneJs(null)
+        OptionJs(2).filterNot((x: Int) => x > 0) == NoneJs(2),
+        OptionJs(2).filterNot((x: Int) => x > 4) == SomeJs(2),
+        OptionJs(null).filterNot((x: Null) => false) == NoneJs(null)
       )
     }
 
     "find" - {
       assert(
-        OptionJs(2).find(_ > 0) == SomeJs(2),
-        OptionJs(2).find(_ > 4) == NoneJs(2),
-        OptionJs(null).find(_ => true) == NoneJs(null)
+        OptionJs(2).find((x: Int) => x > 0) == SomeJs(2),
+        OptionJs(2).find((x: Int) => x > 4) == NoneJs(2),
+        OptionJs(null).find((x: Null) => true) == NoneJs(null)
       )
     }
 
     "exists" - {
       assert(
-        OptionJs(2).exists(_ > 0),
-        !OptionJs(2).exists(_ > 4),
-        !OptionJs(null).exists(_ => true)
+        OptionJs(2).exists((x: Int) => x > 0),
+        !OptionJs(2).exists((x: Int) => x > 4),
+        !OptionJs(null).exists((x: Null) => true)
       )
     }
 
     "forall" - {
       assert(
-        OptionJs(2).forall(_ > 0),
-        !OptionJs(2).forall(_ > 4),
-        !OptionJs(null).forall(_ => true)
+        OptionJs(2).forall((x: Int) => x > 0),
+        !OptionJs(2).forall((x: Int) => x > 4),
+        !OptionJs(null).forall((x: Null) => true)
       )
     }
 
@@ -216,6 +216,17 @@ object OptionJsTest extends TestSuite {
       ret = OptionJs[Int](null.asInstanceOf[Int]).`match`(someHandler, noneHandler)
       check(false, Array(NoneJs(null)), "null")
       reset()
+    }
+
+    "contains" - {
+      assert(
+        OptionJs("a").contains("a"),
+        !OptionJs("a").contains("b"),
+        OptionJs(1).contains(1),
+        !OptionJs(null).contains(null),
+        SomeJs(null).contains(null),
+        !NoneJs(null).contains(null)
+      )
     }
   }
 }

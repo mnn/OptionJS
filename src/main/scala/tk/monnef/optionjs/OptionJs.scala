@@ -35,6 +35,8 @@ abstract class OptionJs[+A] {
 
   @JSExport def foreach(fn: js.Function1[A, Unit]): Unit
 
+  @JSExport def forEach(fn: js.Function1[A, Unit]): Unit = foreach(fn)
+
   @JSExport def getOrElse[B >: A](default: B): B = if (isEmpty) default else get
 
   @JSExport def orElse[B >: A](other: OptionJs[B]): OptionJs[B]
@@ -47,19 +49,19 @@ abstract class OptionJs[+A] {
 
   @JSExport def nonEmpty: Boolean = isDefined
 
-  @JSExport def count(p: (A) => Boolean): Int = filter(p).size
+  @JSExport def count(p: js.Function1[A, Boolean]): Int = filter(p).size
 
   @JSExport def size: Int = if (isEmpty) 0 else 1
 
-  @JSExport def filter(p: (A) => Boolean): OptionJs[A]
+  @JSExport def filter(p: js.Function1[A, Boolean]): OptionJs[A]
 
-  @JSExport def filterNot(p: (A) => Boolean): OptionJs[A] = filter(x => !p(x))
+  @JSExport def filterNot(p: js.Function1[A, Boolean]): OptionJs[A] = filter((x: A) => !p(x))
 
-  @JSExport def find(p: (A) => Boolean): OptionJs[A] = filter(p)
+  @JSExport def find(p: js.Function1[A, Boolean]): OptionJs[A] = filter(p)
 
-  @JSExport def exists(p: (A) => Boolean): Boolean = filter(p).isDefined
+  @JSExport def exists(p: js.Function1[A, Boolean]): Boolean = filter(p).isDefined
 
-  @JSExport def forall(p: (A) => Boolean): Boolean = exists(p)
+  @JSExport def forall(p: js.Function1[A, Boolean]): Boolean = exists(p)
 
   @JSExport def flatten[B](implicit ev: A <:< OptionJs[B]): OptionJs[B] = ev(get)
 
@@ -78,6 +80,8 @@ abstract class OptionJs[+A] {
   //  }
 
   @JSExport def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C
+
+  @JSExport def contains[B >: A](other: B): Boolean
 }
 
 @JSExport("Some") case class SomeJs[+A](rawValue: A) extends OptionJs[A] {
@@ -94,7 +98,7 @@ abstract class OptionJs[+A] {
 
   override def isEmpty: Boolean = false
 
-  override def filter(p: (A) => Boolean): OptionJs[A] = if (p(value)) this else NoneJs(value)
+  override def filter(p: js.Function1[A, Boolean]): OptionJs[A] = if (p(value)) this else NoneJs(value)
 
   override def toArray[B >: A]: js.Array[B] = js.Array(value)
 
@@ -103,6 +107,8 @@ abstract class OptionJs[+A] {
   override def mapIf[B >: A](cond: Boolean, fn: js.Function1[A, B]): OptionJs[B] = if (cond) map(fn) else this
 
   override def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C = some(value, this)
+
+  override def contains[B >: A](other: B): Boolean = other == value
 }
 
 @JSExport("None") case class NoneJs[+A](noneValue: Any) extends OptionJs[A] {
@@ -116,7 +122,7 @@ abstract class OptionJs[+A] {
 
   override def isEmpty: Boolean = true
 
-  override def filter(p: (A) => Boolean): OptionJs[A] = this
+  override def filter(p: js.Function1[A, Boolean]): OptionJs[A] = this
 
   override def toArray[B >: A]: js.Array[B] = js.Array()
 
@@ -125,4 +131,6 @@ abstract class OptionJs[+A] {
   override def mapIf[B >: A](cond: Boolean, fn: js.Function1[A, B]): OptionJs[B] = this
 
   override def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C = none(this)
+
+  override def contains[B >: A](other: B): Boolean = false
 }
