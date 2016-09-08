@@ -4,6 +4,7 @@ import utest._
 
 import scala.scalajs.js
 import scala.scalajs.js._
+import scala.scalajs.js.JSConverters._
 
 object OptionJsTest extends TestSuite {
   val tests = this {
@@ -159,15 +160,6 @@ object OptionJsTest extends TestSuite {
       )
     }
 
-    "toArray" - {
-      val hiArray = OptionJs("hi").toArray
-      assert(hiArray.size == 1, hiArray.head == "hi") // indirect testing b/c "== js.Array" was crashing
-      assert(
-        OptionJs(null).toArray.isEmpty,
-        OptionJs(js.undefined).toArray.isEmpty
-      )
-    }
-
     "mapIf" - {
       assert(
         OptionJs(5).mapIf((x: Int) => x > 1, (x: Int) => x + 1).get == 6,
@@ -226,6 +218,21 @@ object OptionJsTest extends TestSuite {
         !OptionJs(null).contains(null),
         SomeJs(null).contains(null),
         !NoneJs(null).contains(null)
+      )
+    }
+
+    "toArray" - {
+      assert(
+        OptionJs("a").toArray().toArray.sameElements(Array("a")),
+        OptionJs[Null](null).toArray().toArray.sameElements(Array[Null]())
+      )
+    }
+
+    "toObject" - {
+      assert(
+        OptionJs("a").toObject().selectDynamic("value").asInstanceOf[String] == "a",
+        OptionJs("a").toObject("moo").selectDynamic("moo").asInstanceOf[String] == "a",
+        js.isUndefined(OptionJs[Null](null).toObject().selectDynamic("value"))
       )
     }
   }

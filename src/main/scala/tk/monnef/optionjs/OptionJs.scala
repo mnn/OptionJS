@@ -1,6 +1,7 @@
 package tk.monnef.optionjs
 
 import scala.scalajs.js
+import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.{JSApp, JavaScriptException}
 import scala.scalajs.js.annotation.JSExport
 
@@ -69,7 +70,9 @@ abstract class OptionJs[+A] {
 
   @JSExport def flatMap[B](f: (A) => OptionJs[B]): OptionJs[B] = map(f).flatten
 
-  @JSExport def toArray[B >: A]: js.Array[B]
+  @JSExport def toArray[B >: A](): js.Array[B]
+
+  @JSExport def toObject(fieldName: String = "value"): js.Dynamic
 
   @JSExport def mapIf[B >: A](cond: js.Function1[A, Boolean], fn: js.Function1[A, B]): OptionJs[B]
 
@@ -102,7 +105,9 @@ abstract class OptionJs[+A] {
 
   override def filter(p: js.Function1[A, Boolean]): OptionJs[A] = if (p(value)) this else NoneJs(value)
 
-  override def toArray[B >: A]: js.Array[B] = js.Array(value)
+  override def toArray[B >: A](): js.Array[B] = js.Array(value)
+
+  override def toObject(fieldName: String): js.Dynamic = js.Dynamic.literal((fieldName, value.asInstanceOf[js.Any]))
 
   override def mapIf[B >: A](cond: js.Function1[A, Boolean], fn: js.Function1[A, B]): OptionJs[B] = mapIf(cond(value), fn)
 
@@ -128,7 +133,9 @@ abstract class OptionJs[+A] {
 
   override def filter(p: js.Function1[A, Boolean]): OptionJs[A] = this
 
-  override def toArray[B >: A]: js.Array[B] = js.Array()
+  override def toArray[B >: A](): js.Array[B] = js.Array()
+
+  override def toObject(fieldName: String): js.Dynamic = js.Dynamic.literal()
 
   override def mapIf[B >: A](cond: js.Function1[A, Boolean], fn: js.Function1[A, B]): OptionJs[B] = this
 

@@ -88,7 +88,7 @@ tryLaunch('log'); // returns 'whee, that log burns so hot'
 tryLaunch(null);  // calls haltVehicle and returns 'Wait! I got no fuel!'
 ```
 
-Of course you can chain it freely until you call end of `Option` via e.g. `get`, `orNull` or `getOrElse`. There many more exits.
+Of course you can chain it freely until you call end of `Option` via e.g. `get`, `orNull` or `getOrElse`. There are many more.
 
 ```javascript
 const isAccessAllowed = user => Option(user)
