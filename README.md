@@ -117,7 +117,40 @@ option.map(x => x.length).orNull // null
 some.map(x => x.length).orNull // crashed with: TypeError: Cannot read property 'length' of null
 ```
 
-**TODO**: mapIf, flatten, flatMap
+**TODO**: mapIf
+
+#### Flatting
+
+When composing `Option`s we will eventually hit a case of multiple wrapped `Some`s like here.
+```javascript
+Option(Option('double some')).toString() // "Some(Some(double some))"
+```
+Fear not, there is a simple fix - `flatten`.
+```javascript
+Option(Option('double some')).flatten.orNull // "double some"
+```
+Let's say we have some kind of complex computation which might fail. We don't want those ugly `null`s, so we naturaly use `Option`.
+```javascript
+const calculate = y => Option(y === 1 ? null : y + 100);
+```
+But, when want to chain some optional value with our computation, we are getting this multi-layered object:
+```javascript
+Option(0).map(calculate).toString() // "Some(Some(100))"
+```
+We could use the `flatten` mentioned earlier,
+```javascript
+Option(0).map(calculate).flatten.toString() // "Some(100)"
+```
+but there is a better way. Method `flatMap` is a combination of `map` and `flatten` (in this order) so we smoothly chain it like this:
+```javascript
+Option(0).flatMap(calculate).toString() // "Some(100)"
+Option(1).flatMap(calculate).toString() // "None"
+```
+It is also a bit safer then `map` + `flatten`:
+```javascript
+Option(null).flatMap(calculate).toString() // "None"
+Option(null).map(calculate).flatten.toString() // crashed with: "Cannot flatten None."
+```
 
 #### Conversions
 ```javascript

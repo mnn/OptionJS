@@ -3,7 +3,7 @@ package tk.monnef.optionjs
 import scala.annotation.meta.field
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
-import scala.scalajs.js.{JSApp, JavaScriptException}
+import scala.scalajs.js.{Dynamic, JSApp, JavaScriptException}
 import scala.scalajs.js.annotation.JSExport
 
 object OptionJsInit extends JSApp {
@@ -72,7 +72,7 @@ abstract class OptionJs[+A] {
   //  @JSExport def flatten[B](implicit ev: A <:< OptionJs[B]): OptionJs[B] = ev(get)
   @JSExport def flatten[B]: OptionJs[B]
 
-  @JSExport def flatMap[B](f: js.Function1[A, OptionJs[B]]): OptionJs[B] = map(f).flatten
+  @JSExport def flatMap[B](f: js.Function1[A, OptionJs[B]]): OptionJs[B]
 
   @JSExport def toArray[B >: A](): js.Array[B]
 
@@ -85,6 +85,9 @@ abstract class OptionJs[+A] {
   @JSExport def `match`[B >: A, C](some: js.Function2[B, SomeJs[B], C], none: js.Function1[NoneJs[B], C]): C
 
   @JSExport def contains[B >: A](other: B): Boolean
+
+  @JSExport override def toString(): String
+
 }
 
 @JSExport("Some") case class SomeJs[+A](rawValue: A) extends OptionJs[A] {
@@ -103,6 +106,8 @@ abstract class OptionJs[+A] {
 
   override def filter(p: js.Function1[A, Boolean]): OptionJs[A] = if (p(value)) this else NoneJs(value)
 
+  override def flatMap[B](f: js.Function1[A, OptionJs[B]]): OptionJs[B] = map(f).flatten
+
   override def toArray[B >: A](): js.Array[B] = js.Array(value)
 
   override def toObject(fieldName: String): js.Dynamic = js.Dynamic.literal((fieldName, value.asInstanceOf[js.Any]))
@@ -120,6 +125,17 @@ abstract class OptionJs[+A] {
   override def flatten[B]: OptionJs[B] =
     if (value.isInstanceOf[OptionJs[_]]) value.asInstanceOf[OptionJs[B]]
     else throw new FlattenError("Cannot flatten Some without inner Option.")
+
+  override def toString(): String = {
+    val inner = if (value == null) "null"
+    else {
+      val dynValue = value.asInstanceOf[Dynamic]
+      val toStringFn = dynValue.selectDynamic("toString")
+      if (js.isUndefined(toStringFn)) js.JSON.stringify(value.asInstanceOf[js.Any])
+      else dynValue.applyDynamic("toString")()
+    }
+    s"Some($inner)"
+  }
 }
 
 @JSExport("None") case class NoneJs[+A](@(JSExport@field) noneValue: Any) extends OptionJs[A] {
@@ -134,6 +150,8 @@ abstract class OptionJs[+A] {
   override def isEmpty: Boolean = true
 
   override def filter(p: js.Function1[A, Boolean]): OptionJs[A] = this
+
+  override def flatMap[B](f: js.Function1[A, OptionJs[B]]): OptionJs[B] = this.asInstanceOf[OptionJs[B]]
 
   override def toArray[B >: A](): js.Array[B] = js.Array()
 
@@ -152,4 +170,6 @@ abstract class OptionJs[+A] {
   override def orNull: A = null.asInstanceOf[A]
 
   override def flatten[B]: OptionJs[B] = throw new FlattenError("Cannot flatten None.")
+
+  override def toString(): String = "None"
 }

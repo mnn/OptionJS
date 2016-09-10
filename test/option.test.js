@@ -114,6 +114,7 @@ describe('Option', function() {
   it('flatMap', function() {
     Option('a').flatMap(x => Option(x + 2)).get.should.be.equal('a2');
     Option('a').flatMap(x => Option()).should.be.instanceOf(None);
+    Option(null).flatMap(x => Option(x + 2)).should.be.instanceOf(None);
   });
 
   it('mapIf', function() {
@@ -177,4 +178,10 @@ describe('Option', function() {
     Option('a').toObject('moo').should.be.eql({moo: 'a'});
     Option(null).toObject().should.be.eql({});
   });
+
+  it('toString', function() {
+    Option(2).toString().should.equal('Some(2)');
+    Option(null).toString().should.equal('None');
+    Option(Option('Jim')).toString().should.equal('Some(Some(Jim))');
+  })
 });

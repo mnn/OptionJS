@@ -146,6 +146,19 @@
         printAndRun(`Option(null).toObject()`);
     })();
 
+    (function() {
+        function printAndRun(expr) { console.log(expr, '//', JSON.stringify(eval(expr))); }
+
+        const calculate = y => Option(y === 1 ? null : y + 100);
+        printAndRun(`Option(Option('double some')).toString()`);
+        printAndRun(`Option(Option('double some')).flatten.orNull`);
+        printAndRun(`Option(0).map(calculate).toString()`);
+        printAndRun(`Option(0).map(calculate).flatten.toString()`);
+        printAndRun(`Option(0).flatMap(calculate).toString()`);
+        printAndRun(`Option(1).flatMap(calculate).toString()`);
+        printAndRun(`Option(null).flatMap(calculate).toString()`);
+    })();
+
 </script>
 </body>
 </html>

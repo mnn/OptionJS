@@ -156,7 +156,8 @@ object OptionJsTest extends TestSuite {
 
     "flatMap" - {
       assert(
-        OptionJs("a").flatMap(x => SomeJs(x * 2)) == SomeJs("aa")
+        OptionJs("a").flatMap((x: String) => SomeJs(x * 2)) == SomeJs("aa"),
+        OptionJs[String](null.asInstanceOf[String]).flatMap((x: String) => OptionJs(x * 2)) == NoneJs(null)
       )
     }
 
@@ -233,6 +234,14 @@ object OptionJsTest extends TestSuite {
         OptionJs("a").toObject().selectDynamic("value").asInstanceOf[String] == "a",
         OptionJs("a").toObject("moo").selectDynamic("moo").asInstanceOf[String] == "a",
         js.isUndefined(OptionJs[Null](null).toObject().selectDynamic("value"))
+      )
+    }
+
+    "toString" - {
+      assert(
+        OptionJs(2).toString() == "Some(2)",
+        OptionJs(null).toString() == "None",
+        OptionJs(OptionJs("Jim")).toString() == "Some(Some(Jim))"
       )
     }
   }
