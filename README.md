@@ -109,13 +109,25 @@ isAccessAllowed({name: 'Wesley', age: 15}); // false
 Please note that they are not interchangeable. When you execute `Some(...)` you will always get an instance of `Some`. So you can effectively construct `Some(null)` or `Some(undefined)` which is usually not desirable - it nulls all advantages `Option` provides.
 
 ```javascript
+const option = Option(null);
+const some = Some(null);
 option.isDefined // false
 some.isDefined // true
 option.map(x => x.length).orNull // null
 some.map(x => x.length).orNull // crashed with: TypeError: Cannot read property 'length' of null
 ```
 
-**TODO**: mapIf, flatten, flatMap, toArray, toObject
+**TODO**: mapIf, flatten, flatMap
+
+#### Conversions
+```javascript
+Option('Enterprise').toArray() // ["Enterprise"]
+Option(null).toArray() // []
+Option('Enterprise').toObject() // {"value":"Enterprise"}
+Option('Enterprise').toObject('ship') // {"ship":"Enterprise"}
+Option(null).toObject() // {}
+```
+
 
 ### More complex usage
 

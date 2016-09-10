@@ -136,6 +136,16 @@
         }
     })();
 
+    (function() {
+        function printAndRun(expr) { console.log(expr, '//', JSON.stringify(eval(expr))); }
+
+        printAndRun(`Option('Enterprise').toArray()`);
+        printAndRun(`Option(null).toArray()`);
+        printAndRun(`Option('Enterprise').toObject()`);
+        printAndRun(`Option('Enterprise').toObject('ship')`);
+        printAndRun(`Option(null).toObject()`);
+    })();
+
 </script>
 </body>
 </html>
