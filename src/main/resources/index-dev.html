@@ -120,6 +120,22 @@
         printAndRun(`isAccessAllowed({name: 'Jean-Luc', age: 58});`);
         printAndRun(`isAccessAllowed({name: 'Wesley', age: 15});`);
     })();
+
+    (function() {
+        function printAndRun(expr) { console.log(expr, '//', JSON.stringify(eval(expr))); }
+
+        const option = Option(null);
+        const some = Some(null);
+        printAndRun(`option.isDefined`);
+        printAndRun(`some.isDefined`);
+        printAndRun(`option.map(x => x.length).orNull`);
+        try {
+            printAndRun(`some.map(x => x.length).orNull`);
+        } catch (e) {
+            console.log('crashed with:', e);
+        }
+    })();
+
 </script>
 </body>
 </html>

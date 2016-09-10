@@ -104,7 +104,18 @@ isAccessAllowed({name: 'Jean-Luc', age: 58}); // true
 isAccessAllowed({name: 'Wesley', age: 15}); // false
 ```
 
-**TODO**: mapIf, flatten, flatMap, toArray
+#### Option() versus Some()
+
+Please note that they are not interchangeable. When you execute `Some(...)` you will always get an instance of `Some`. So you can effectively construct `Some(null)` or `Some(undefined)` which is usually not desirable - it nulls all advantages `Option` provides.
+
+```javascript
+option.isDefined // false
+some.isDefined // true
+option.map(x => x.length).orNull // null
+some.map(x => x.length).orNull // crashed with: TypeError: Cannot read property 'length' of null
+```
+
+**TODO**: mapIf, flatten, flatMap, toArray, toObject
 
 ### More complex usage
 
@@ -150,7 +161,15 @@ Object { name: "Leonard", nickname: "Bones", middleName: null, surname: "McCoy" 
 
 ## Development
 
-[SBT](http://www.scala-sbt.org/) is required for build.
+[SBT](http://www.scala-sbt.org/) is required for build. [npm](https://www.npmjs.com/) is necessary for testing.
+
+### Setup
+
+After cloning repository or downloading a zip you need to install npm dependencies:
+
+```
+npm install
+```
 
 ### Development
 Build:
@@ -161,13 +180,24 @@ Or with watch functionality:
 ```
 sbt ~fastOptJS
 ```
-Tests can be run via (NodeJS with source maps is required):
+Scala tests can be run via (NodeJS with source maps is required):
 ```
 sbt test
 ```
 
+JavaScript tests can be run as follows:
+```
+npm run test-js
+```
+
+To run both test sets execute this:
+```
+npm test
+```
+
+
 ### Optimized
-To build optimized (minimized) version:
+To build an optimized (minimized) version:
 ```
 sbt fullOptJS
 ```

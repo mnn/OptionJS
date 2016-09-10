@@ -28,7 +28,7 @@ object OptionJsTest extends TestSuite {
       )
     }
 
-    "mapp" - {
+    "map" - {
       assert(
         OptionJs(4).map((a: Int) => a + "x").value == "4x",
         OptionJs(4).map((a: Int) => a * 2).value == 8,

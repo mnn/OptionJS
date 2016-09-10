@@ -1,0 +1,25 @@
+{
+  "name": "optionjs",
+  "version": "0.0.1",
+  "description": "**WIP**",
+  "dependencies": {
+    "chai": "^3.5.0"
+  },
+  "devDependencies": {
+    "chai-spies": "^0.7.1"
+  },
+  "scripts": {
+    "test": "npm run test-scala && npm run test-js",
+    "test-js": "sbt fastOptJS && mocha",
+    "test-scala": "sbt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnn/OptionJS.git"
+  },
+  "author": "monnef",
+  "bugs": {
+    "url": "https://github.com/mnn/OptionJS/issues"
+  },
+  "homepage": "https://github.com/mnn/OptionJS#readme"
+}
