@@ -1,5 +1,6 @@
 package tk.monnef.optionjs
 
+import scala.annotation.meta.field
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.{JSApp, JavaScriptException}
@@ -116,12 +117,12 @@ abstract class OptionJs[+A] {
 
   override def orNull: A = value
 
-  @JSExport def flatten[B]: OptionJs[B] =
+  override def flatten[B]: OptionJs[B] =
     if (value.isInstanceOf[OptionJs[_]]) value.asInstanceOf[OptionJs[B]]
     else throw new FlattenError("Cannot flatten Some without inner Option.")
 }
 
-@JSExport("None") case class NoneJs[+A](noneValue: Any) extends OptionJs[A] {
+@JSExport("None") case class NoneJs[+A](@(JSExport@field) noneValue: Any) extends OptionJs[A] {
   val value = null.asInstanceOf[A]
 
   override def map[B](fn: js.Function1[A, B]): OptionJs[B] = NoneJs(noneValue)
@@ -150,5 +151,5 @@ abstract class OptionJs[+A] {
 
   override def orNull: A = null.asInstanceOf[A]
 
-  @JSExport def flatten[B]: OptionJs[B] = throw new FlattenError("Cannot flatten None.")
+  override def flatten[B]: OptionJs[B] = throw new FlattenError("Cannot flatten None.")
 }

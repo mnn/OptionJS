@@ -127,7 +127,36 @@ describe('Option', function() {
     Option(5).mapIf(false, add).get.should.be.equal(5);
   });
 
-  it('match');
+  it('match', function() {
+    const test = (optionInput, isSome, expectedReturnValue) => {
+      let params = null;
+      const someHandler = chai.spy((...args) => {
+        params = args;
+        return args[0].toString();
+      });
+      const noneHandler = chai.spy((...args) => {
+        params = args;
+        return Option(args[0].noneValue).map(x => x.toString()).getOrElse('null');
+      });
+      const res = Option(optionInput).match(someHandler, noneHandler);
+      res.should.be.equal(expectedReturnValue);
+      const expectHandler = isSome ? someHandler : noneHandler;
+      const notExpectedHandler = isSome ? noneHandler : someHandler;
+      expectHandler.should.have.been.called.once;
+      notExpectedHandler.should.have.not.been.called();
+      should.exist(params);
+      if (isSome) {
+        params[0].should.be.equal(optionInput);
+        params[1].should.be.instanceOf(Some);
+        params[1].get.should.be.equal(optionInput);
+      } else {
+        params[0].should.be.instanceOf(None);
+      }
+    };
+    test(2, true, '2');
+    test('a', true, 'a');
+    test(null, false, 'null');
+  });
 
   it('contains', function() {
     Option('a').contains('a').should.be.true;
